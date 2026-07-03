@@ -1,6 +1,9 @@
-import { marketChecksMock } from "./market-checks.mock";
+import { createApiClient } from "@/lib/api/api-client";
 import { MarketChecksClientPage } from "./MarketChecksClientPage";
 
-export function MarketChecksPage() {
-  return <MarketChecksClientPage kpis={marketChecksMock.kpis} checks={marketChecksMock.checks} />;
+export async function MarketChecksPage() {
+  const api = createApiClient();
+  const result = await api.getMarketChecksData();
+
+  return <MarketChecksClientPage kpis={result.data.kpis} checks={result.data.checks} />;
 }
