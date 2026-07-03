@@ -11,7 +11,8 @@
 .order-sheet-content,
 .field-sheet-content,
 .plan-sheet-content,
-.visit-sheet-content {
+.visit-sheet-content,
+.route-sheet-content {
   display: grid;
   gap: 12px;
 }
@@ -19,7 +20,8 @@
 .order-total-card,
 .field-focus-card,
 .plan-focus-card,
-.visit-focus-card {
+.visit-focus-card,
+.route-focus-card {
   display: grid;
   gap: 5px;
   border: 1px solid rgba(228, 231, 236, 0.92);
@@ -40,6 +42,10 @@
   background: linear-gradient(135deg, #ecfeff, #f0fdf4);
 }
 
+.route-focus-card {
+  background: linear-gradient(135deg, #eff6ff, #ecfeff);
+}
+
 .order-total-card span,
 .order-total-card small,
 .field-focus-card span,
@@ -47,7 +53,9 @@
 .plan-focus-card span,
 .plan-focus-card small,
 .visit-focus-card span,
-.visit-focus-card small {
+.visit-focus-card small,
+.route-focus-card span,
+.route-focus-card small {
   color: var(--muted);
   font-size: 13px;
 }
@@ -55,7 +63,8 @@
 .order-total-card strong,
 .field-focus-card strong,
 .plan-focus-card strong,
-.visit-focus-card strong {
+.visit-focus-card strong,
+.route-focus-card strong {
   color: var(--brand-strong);
   font-size: 28px;
   letter-spacing: -0.04em;
@@ -71,6 +80,10 @@
 
 .visit-focus-card strong {
   color: #0891b2;
+}
+
+.route-focus-card strong {
+  color: #2563eb;
 }
 
 .sheet-note-card {
@@ -101,14 +114,16 @@
   .order-total-card,
   .field-focus-card,
   .plan-focus-card,
-  .visit-focus-card {
+  .visit-focus-card,
+  .route-focus-card {
     padding: 15px;
   }
 
   .order-total-card strong,
   .field-focus-card strong,
   .plan-focus-card strong,
-  .visit-focus-card strong {
+  .visit-focus-card strong,
+  .route-focus-card strong {
     font-size: 26px;
   }
 }
