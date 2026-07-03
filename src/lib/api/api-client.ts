@@ -1,3 +1,13 @@
+import { accountsMock } from "@/features/accounts/accounts.mock";
+import type { AccountsData } from "@/features/accounts/accounts.types";
+import { actionsMock } from "@/features/actions/actions.mock";
+import type { ActionsData } from "@/features/actions/actions.types";
+import { marketChecksMock } from "@/features/market-checks/market-checks.mock";
+import type { MarketChecksData } from "@/features/market-checks/market-checks.types";
+import { mcpDayMock } from "@/features/mcp-day/mcp-day.mock";
+import type { McpDayData } from "@/features/mcp-day/mcp-day.types";
+import { routesMock } from "@/features/routes/routes.mock";
+import type { RoutesData } from "@/features/routes/routes.types";
 import type {
   AccountDto,
   ActionDto,
@@ -15,11 +25,16 @@ export type McpApiClient = {
   getDashboardSummary(): Promise<ApiResult<DashboardSummaryDto>>;
   getDashboardOverview(): Promise<ApiResult<DashboardOverviewDto>>;
   listRoutes(query?: ListQuery): Promise<ApiResult<RouteDto[]>>;
+  getRoutesData(query?: ListQuery): Promise<ApiResult<RoutesData>>;
   listAccounts(query?: ListQuery): Promise<ApiResult<AccountDto[]>>;
+  getAccountsData(query?: ListQuery): Promise<ApiResult<AccountsData>>;
   getCurrentDayRun(query?: ListQuery): Promise<ApiResult<DayRunDto>>;
+  getMcpDayData(query?: ListQuery): Promise<ApiResult<McpDayData>>;
   listMarketChecks(query?: ListQuery): Promise<ApiResult<MarketCheckDto[]>>;
+  getMarketChecksData(query?: ListQuery): Promise<ApiResult<MarketChecksData>>;
   listOrders(query?: ListQuery): Promise<ApiResult<OrderDto[]>>;
   listActions(query?: ListQuery): Promise<ApiResult<ActionDto[]>>;
+  getActionsData(query?: ListQuery): Promise<ApiResult<ActionsData>>;
 };
 
 function result<T>(data: T, source: ApiResult<T>["source"] = "mock"): ApiResult<T> {
@@ -65,19 +80,31 @@ export const mockApiClient: McpApiClient = {
       { id: "route-002", name: "Tuyen My Tho", area: "My Tho", owner: "Sale B", active: true }
     ]);
   },
+  async getRoutesData() {
+    return result(routesMock);
+  },
   async listAccounts() {
     return result([
       { id: "acc-001", name: "Diem ban Minh Chau", area: "Cho Gao", routeName: "Tuyen Cho Gao", tier: "A" },
       { id: "acc-002", name: "Diem ban Thanh Phat", area: "Cho Gao", routeName: "Tuyen Cho Gao", tier: "B" }
     ]);
   },
+  async getAccountsData() {
+    return result(accountsMock);
+  },
   async getCurrentDayRun() {
     return result({ id: "day-001", routeName: "Tuyen Cho Gao", date: "2026-07-03", owner: "Sale A", status: "opened" });
+  },
+  async getMcpDayData() {
+    return result(mcpDayMock);
   },
   async listMarketChecks() {
     return result([
       { id: "check-001", date: "2026-07-03", routeName: "Tuyen Cho Gao", accountName: "Diem ban Minh Chau", productName: "Sua hop 180ml", status: "opportunity" }
     ]);
+  },
+  async getMarketChecksData() {
+    return result(marketChecksMock);
   },
   async listOrders() {
     return result([
@@ -90,6 +117,9 @@ export const mockApiClient: McpApiClient = {
     return result([
       { id: "act-001", title: "Ghe lai diem ban dong cua", owner: "Sale C", priority: "high", status: "todo", dueDate: "2026-07-04" }
     ]);
+  },
+  async getActionsData() {
+    return result(actionsMock);
   }
 };
 
