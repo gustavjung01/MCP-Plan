@@ -1,6 +1,9 @@
-import { actionsMock } from "./actions.mock";
+import { createApiClient } from "@/lib/api/api-client";
 import { ActionsClientPage } from "./ActionsClientPage";
 
-export function ActionsPage() {
-  return <ActionsClientPage kpis={actionsMock.kpis} items={actionsMock.items} />;
+export async function ActionsPage() {
+  const api = createApiClient();
+  const actionsResult = await api.getActionsData();
+
+  return <ActionsClientPage kpis={actionsResult.data.kpis} items={actionsResult.data.items} />;
 }
