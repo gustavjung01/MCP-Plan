@@ -27,6 +27,14 @@ const orders = [
   { id: "order-003", code: "DH-0003", date: "2026-07-02", accountName: "Diem ban Tan Loi", routeName: "Tuyen Cai Be", owner: "Sale B", source: "Phone", skuCount: 5, quantity: 42, totalAmount: 3150000, status: "confirmed" }
 ];
 
+const marketChecks = [
+  { id: "check-001", date: "2026-07-03", routeName: "Tuyen Cho Gao", accountName: "Diem ban Minh Chau", productName: "Sua hop 180ml", competitorName: "Doi thu A", shelfPrice: 8200, stockStatus: "Con hang", note: "Gia on dinh, co the tang trung bay", status: "opportunity" },
+  { id: "check-002", date: "2026-07-03", routeName: "Tuyen Cho Gao", accountName: "Diem ban Thanh Phat", productName: "Nuoc giai khat chai", competitorName: "Doi thu B", shelfPrice: 10500, stockStatus: "Sap het", note: "Can bo sung hang truoc cuoi tuan", status: "risk" },
+  { id: "check-003", date: "2026-07-03", routeName: "Tuyen My Tho", accountName: "Diem ban Huong Que", productName: "Banh goi nho", competitorName: "Khong ro", shelfPrice: 15000, stockStatus: "Con hang", note: "Ban cham, can theo doi them", status: "normal" },
+  { id: "check-004", date: "2026-07-02", routeName: "Tuyen Go Cong", accountName: "Diem ban Ven Song", productName: "Sua chua uong", competitorName: "Doi thu C", shelfPrice: 7200, stockStatus: "Het hang", note: "Mat vi tri ke hang vao doi thu", status: "risk" },
+  { id: "check-005", date: "2026-07-02", routeName: "Tuyen Cai Be", accountName: "Diem ban Tan Loi", productName: "Tra dong chai", competitorName: "Doi thu A", shelfPrice: 9000, stockStatus: "Con hang", note: "Co co hoi khuyen mai combo", status: "opportunity" }
+];
+
 const mcpDay = {
   run: { id: "day-001", routeName: "Tuyen Cho Gao", date: "2026-07-03", owner: "Sale A", status: "opened", openedAt: "08:00" },
   lines: [
@@ -197,6 +205,48 @@ function getOrders(url) {
   });
 }
 
+function getMarketChecks(url) {
+  const status = url.searchParams.get("status");
+  const search = url.searchParams.get("search")?.trim().toLowerCase();
+
+  return marketChecks.filter((check) => {
+    if (status && check.status !== status) return false;
+    if (search) {
+      const haystack = `${check.accountName} ${check.routeName} ${check.productName} ${check.competitorName} ${check.note}`.toLowerCase();
+      return haystack.includes(search);
+    }
+    return true;
+  });
+}
+
+function getMarketChecksList(url) {
+  return getMarketChecks(url).map((check) => ({
+    id: check.id,
+    date: check.date,
+    routeName: check.routeName,
+    accountName: check.accountName,
+    productName: check.productName,
+    status: check.status
+  }));
+}
+
+function getMarketChecksData(url) {
+  const checks = getMarketChecks(url);
+  const opportunities = checks.filter((check) => check.status === "opportunity").length;
+  const risks = checks.filter((check) => check.status === "risk").length;
+  const skuCount = new Set(checks.map((check) => check.productName)).size;
+
+  return {
+    kpis: [
+      { label: "Diem da kiem", value: checks.length, hint: "Backend API" },
+      { label: "Co hoi", value: opportunities, hint: "Gia / trung bay tot" },
+      { label: "Rui ro", value: risks, hint: "Doi thu / het hang" },
+      { label: "SKU", value: skuCount, hint: "San pham ghi nhan" }
+    ],
+    checks
+  };
+}
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || `${HOST}:${PORT}`}`);
 
@@ -257,6 +307,21 @@ const server = http.createServer((req, res) => {
 
   if (url.pathname === "/api/orders") {
     json(res, 200, wrap(getOrders(url)));
+    return;
+  }
+
+  if (url.pathname === "/api/tests") {
+    json(res, 200, wrap(getMarketChecksData(url)));
+    return;
+  }
+
+  if (url.pathname === "/api/market-checks") {
+    json(res, 200, wrap(getMarketChecksList(url)));
+    return;
+  }
+
+  if (url.pathname === "/api/market-checks/data") {
+    json(res, 200, wrap(getMarketChecksData(url)));
     return;
   }
 
