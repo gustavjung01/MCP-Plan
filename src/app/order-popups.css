@@ -10,14 +10,16 @@
 
 .order-sheet-content,
 .field-sheet-content,
-.plan-sheet-content {
+.plan-sheet-content,
+.visit-sheet-content {
   display: grid;
   gap: 12px;
 }
 
 .order-total-card,
 .field-focus-card,
-.plan-focus-card {
+.plan-focus-card,
+.visit-focus-card {
   display: grid;
   gap: 5px;
   border: 1px solid rgba(228, 231, 236, 0.92);
@@ -34,19 +36,26 @@
   background: linear-gradient(135deg, #f5f3ff, #ecfeff);
 }
 
+.visit-focus-card {
+  background: linear-gradient(135deg, #ecfeff, #f0fdf4);
+}
+
 .order-total-card span,
 .order-total-card small,
 .field-focus-card span,
 .field-focus-card small,
 .plan-focus-card span,
-.plan-focus-card small {
+.plan-focus-card small,
+.visit-focus-card span,
+.visit-focus-card small {
   color: var(--muted);
   font-size: 13px;
 }
 
 .order-total-card strong,
 .field-focus-card strong,
-.plan-focus-card strong {
+.plan-focus-card strong,
+.visit-focus-card strong {
   color: var(--brand-strong);
   font-size: 28px;
   letter-spacing: -0.04em;
@@ -58,6 +67,10 @@
 
 .plan-focus-card strong {
   color: #7c3aed;
+}
+
+.visit-focus-card strong {
+  color: #0891b2;
 }
 
 .sheet-note-card {
@@ -87,13 +100,15 @@
 
   .order-total-card,
   .field-focus-card,
-  .plan-focus-card {
+  .plan-focus-card,
+  .visit-focus-card {
     padding: 15px;
   }
 
   .order-total-card strong,
   .field-focus-card strong,
-  .plan-focus-card strong {
+  .plan-focus-card strong,
+  .visit-focus-card strong {
     font-size: 26px;
   }
 }
