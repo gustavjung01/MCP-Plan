@@ -1,9 +1,28 @@
+import type { ReactNode } from "react";
 import { NAV_ITEMS } from "./navigation";
 
 type AppShellProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   activeHref?: string;
 };
+
+function NavLinks({ activeHref, mode }: { activeHref: string; mode: "sidebar" | "bottom" }) {
+  return (
+    <nav className={mode === "sidebar" ? "sidebar-nav" : "bottom-nav"} aria-label="Main navigation">
+      {NAV_ITEMS.map((item) => {
+        const isActive = item.href === activeHref;
+        const className = mode === "sidebar" ? (isActive ? "sidebar-link active" : "sidebar-link") : isActive ? "bottom-nav-link active" : "bottom-nav-link";
+
+        return (
+          <a className={className} href={item.href} key={item.href}>
+            <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+            <span className="nav-label">{mode === "sidebar" ? item.label : item.shortLabel}</span>
+          </a>
+        );
+      })}
+    </nav>
+  );
+}
 
 export function AppShell({ children, activeHref = "/" }: AppShellProps) {
   return (
@@ -14,22 +33,13 @@ export function AppShell({ children, activeHref = "/" }: AppShellProps) {
           <div className="sidebar-subtitle">Cong cu quan ly NPP, report va ke hoach hanh dong.</div>
         </div>
 
-        <nav className="sidebar-nav" aria-label="Main navigation">
-          {NAV_ITEMS.map((item) => {
-            const isActive = item.href === activeHref;
-
-            return (
-              <a className={isActive ? "sidebar-link active" : "sidebar-link"} href={item.href} key={item.href}>
-                <span>{item.label}</span>
-              </a>
-            );
-          })}
-        </nav>
+        <NavLinks activeHref={activeHref} mode="sidebar" />
 
         <div className="sidebar-footer">Frontend sach truoc. Backend/VPS va Supabase noi sau theo API contract.</div>
       </aside>
 
       <main className="main">{children}</main>
+      <NavLinks activeHref={activeHref} mode="bottom" />
     </div>
   );
 }
