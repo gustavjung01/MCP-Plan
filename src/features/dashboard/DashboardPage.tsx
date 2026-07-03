@@ -1,10 +1,10 @@
+import { createApiClient } from "@/lib/api/api-client";
+import type { DashboardActionDto, DashboardRouteHealthDto } from "@/lib/api/api.types";
 import { KpiCard } from "@/ui/cards/KpiCard";
 import { FilterBar } from "@/ui/layout/FilterBar";
 import { PageHeader } from "@/ui/layout/PageHeader";
 import { AppShell } from "@/ui/shell/AppShell";
 import { DataTable, type DataTableColumn } from "@/ui/table/DataTable";
-import { dashboardMock } from "./dashboard.mock";
-import type { DashboardRouteHealth } from "./dashboard.types";
 
 function getStatusLabel(status: "good" | "watch" | "risk") {
   if (status === "good") return "Tot";
@@ -18,7 +18,7 @@ function getPriorityLabel(priority: "high" | "medium" | "low") {
   return "Thap";
 }
 
-const routeColumns: DataTableColumn<DashboardRouteHealth>[] = [
+const routeColumns: DataTableColumn<DashboardRouteHealthDto>[] = [
   { key: "routeName", header: "Tuyen", render: (row) => row.routeName },
   { key: "area", header: "Khu vuc", render: (row) => row.area },
   { key: "planned", header: "Ke hoach", render: (row) => row.planned, align: "right" },
@@ -31,27 +31,44 @@ const routeColumns: DataTableColumn<DashboardRouteHealth>[] = [
   }
 ];
 
-export function DashboardPage() {
+function renderAction(action: DashboardActionDto) {
+  return (
+    <article className="action-card" key={action.title}>
+      <div>
+        <span className="badge">Uu tien {getPriorityLabel(action.priority)}</span>
+        <h3>{action.title}</h3>
+        <p className="page-subtitle">{action.description}</p>
+      </div>
+      <strong>{action.owner}</strong>
+    </article>
+  );
+}
+
+export async function DashboardPage() {
+  const api = createApiClient();
+  const dashboardResult = await api.getDashboardOverview();
+  const dashboard = dashboardResult.data;
+
   return (
     <AppShell activeHref="/">
       <PageHeader
         eyebrow="Dashboard"
         title="Tong quan NPP"
-        subtitle="Ban dashboard mock data de chot UI report moi truoc khi noi backend/VPS va Supabase that."
+        subtitle="Dashboard lay data qua API client contract. Sau nay doi backend/VPS/Supabase ma khong sua UI."
       >
-        <span className="badge">Mock data mode</span>
+        <span className="badge">{dashboardResult.source}</span>
       </PageHeader>
 
       <FilterBar
         filters={[
-          { label: "Nguon du lieu", value: "Mock" },
+          { label: "Nguon du lieu", value: dashboardResult.source },
           { label: "Ky bao cao", value: "Hom nay" },
           { label: "Backend", value: "VPS-ready contract" }
         ]}
       />
 
       <section className="grid cards">
-        {dashboardMock.kpis.map((item) => (
+        {dashboard.kpis.map((item) => (
           <KpiCard key={item.label} label={item.label} value={item.value} hint={`${item.hint} · ${item.trend}`} />
         ))}
       </section>
@@ -61,7 +78,7 @@ export function DashboardPage() {
           <h2 className="panel-title">Suc khoe tuyen ban hang</h2>
           <DataTable
             columns={routeColumns}
-            rows={dashboardMock.routeHealth}
+            rows={dashboard.routeHealth}
             getRowKey={(row) => row.routeName}
             emptyMessage="Chua co du lieu tuyen"
           />
@@ -70,7 +87,7 @@ export function DashboardPage() {
         <div className="card">
           <h2 className="panel-title">Chi so nhanh</h2>
           <div className="grid">
-            {dashboardMock.insights.map((item) => (
+            {dashboard.insights.map((item) => (
               <div className="metric-row" key={item.label}>
                 <span>{item.label}</span>
                 <strong>{item.value}</strong>
@@ -82,18 +99,7 @@ export function DashboardPage() {
 
       <section className="card">
         <h2 className="panel-title">Goi y hanh dong</h2>
-        <div className="grid">
-          {dashboardMock.actions.map((action) => (
-            <article className="action-card" key={action.title}>
-              <div>
-                <span className="badge">Uu tien {getPriorityLabel(action.priority)}</span>
-                <h3>{action.title}</h3>
-                <p className="page-subtitle">{action.description}</p>
-              </div>
-              <strong>{action.owner}</strong>
-            </article>
-          ))}
-        </div>
+        <div className="grid">{dashboard.actions.map(renderAction)}</div>
       </section>
     </AppShell>
   );
