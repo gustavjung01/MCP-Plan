@@ -4,7 +4,15 @@ import { createApiClient } from "@/lib/api/api-client";
 export default async function Page() {
   const api = createApiClient();
   const routesResult = await api.getRoutesData();
-  const mcpDayResult = await api.getMcpDayData();
+  const dayResult = await api.getMcpDayData();
+  const routeCustomersResult = await api.getRouteCustomersData();
 
-  return <MCPPage activeHref="/routes" routesData={routesResult.data} mcpDayData={mcpDayResult.data} />;
+  return (
+    <MCPPage
+      activeHref="/routes"
+      routesData={routesResult.data}
+      mcpDayData={dayResult.data}
+      routeCustomersData={routeCustomersResult.data}
+    />
+  );
 }
