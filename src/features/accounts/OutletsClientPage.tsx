@@ -67,7 +67,7 @@ function OutletSheet({ item, onClose }: { item: AccountItem | null; onClose: () 
           </div>
           <div className="sheet-note-card">
             <h3>Ho so diem ban</h3>
-            <p>Day la noi noi visit, order, field check va plan. Sau nay them lich su mua hang, cong no, anh cua hang va ghi chu cham soc.</p>
+            <p>Noi tong hop visit, don hang, field check, viec can lam va ghi chu cham soc cua diem ban.</p>
           </div>
         </div>
       ) : null}
@@ -81,8 +81,8 @@ export function OutletsClientPage({ kpis, items }: { kpis: AccountKpi[]; items: 
 
   return (
     <AppShell activeHref="/customers">
-      <PageHeader eyebrow="Customers" title="Khach hang / diem ban" subtitle="Ho so diem ban noi visit, order, field check va plan trong mot popup mobile-first.">
-        <span className="badge">Mock data</span>
+      <PageHeader eyebrow="Customers" title="Khach hang / diem ban" subtitle="Ho so diem ban noi visit, don hang, field check va viec can lam trong mot luong cham soc.">
+        <span className="badge">Dang cham soc</span>
       </PageHeader>
 
       <FilterBar filters={[{ label: "Khu vuc", value: "Tat ca" }, { label: "Hang diem ban", value: "A/B/C" }, { label: "Trang thai", value: "Dang cham soc + Can ghe lai" }]} />
@@ -108,7 +108,7 @@ export function OutletsClientPage({ kpis, items }: { kpis: AccountKpi[]; items: 
       </section>
 
       <section className="card">
-        <h2 className="panel-title">Goi y module diem ban</h2>
+        <h2 className="panel-title">Goi y cham soc diem ban</h2>
         <article className="action-card">
           <div>
             <span className="badge">Uu tien</span>
