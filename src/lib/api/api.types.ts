@@ -21,6 +21,41 @@ export type DashboardSummaryDto = {
   actionCount: number;
 };
 
+export type DashboardKpiDto = {
+  label: string;
+  value: string | number;
+  hint: string;
+  trend: string;
+};
+
+export type DashboardRouteHealthDto = {
+  routeName: string;
+  area: string;
+  planned: number;
+  visited: number;
+  orders: number;
+  status: "good" | "watch" | "risk";
+};
+
+export type DashboardActionDto = {
+  title: string;
+  description: string;
+  priority: "high" | "medium" | "low";
+  owner: string;
+};
+
+export type DashboardInsightDto = {
+  label: string;
+  value: string;
+};
+
+export type DashboardOverviewDto = {
+  kpis: DashboardKpiDto[];
+  routeHealth: DashboardRouteHealthDto[];
+  actions: DashboardActionDto[];
+  insights: DashboardInsightDto[];
+};
+
 export type RouteDto = {
   id: string;
   name: string;
