@@ -100,7 +100,17 @@ KPI strip is compact.
 Actions are visible without hunting.
 ```
 
-Status: started.
+Status: completed in UI pass.
+
+### Completed changes
+
+```text
+Dashboard now starts with Today summary.
+KPI strip is compact and mobile 2-column.
+Priority actions are shown before route health.
+Route health uses cards with progress bars instead of a desktop table.
+Dashboard still uses API client fallback and does not add business write logic.
+```
 
 ## Phase 2 - Shared UI primitives
 
