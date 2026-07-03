@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from "react";
 import type { ApiResult, OrderDto } from "@/lib/api/api.types";
-import { KpiCard } from "@/ui/cards/KpiCard";
+import { CompactKpiStrip } from "@/ui/cards/CompactKpiStrip";
 import { FilterBar } from "@/ui/layout/FilterBar";
 import { PageHeader } from "@/ui/layout/PageHeader";
 import { BottomSheet } from "@/ui/overlay/BottomSheet";
 import { AppShell } from "@/ui/shell/AppShell";
-import { DataTable, type DataTableColumn } from "@/ui/table/DataTable";
+import { SourceBadge } from "@/ui/status/SourceBadge";
 
 const money = new Intl.NumberFormat("vi-VN", {
   style: "currency",
@@ -19,7 +19,15 @@ function getStatusLabel(status: string) {
   if (status === "draft") return "Nhap";
   if (status === "confirmed") return "Da chot";
   if (status === "delivered") return "Da giao";
-  return "Huy";
+  if (status === "cancelled") return "Huy";
+  return status;
+}
+
+function getStatusClass(status: string) {
+  if (status === "delivered") return "order-status delivered";
+  if (status === "confirmed") return "order-status confirmed";
+  if (status === "draft") return "order-status draft";
+  return "order-status cancelled";
 }
 
 function buildOrderKpis(orders: OrderDto[]) {
@@ -28,26 +36,51 @@ function buildOrderKpis(orders: OrderDto[]) {
   const openOrders = orders.filter((order) => order.status !== "delivered" && order.status !== "cancelled").length;
 
   return [
-    { label: "Don hang", value: orders.length, hint: "Trong ky hien tai" },
+    { label: "Don hang", value: orders.length, hint: "Trong ky" },
     { label: "Doanh so", value: money.format(totalAmount), hint: "Tong gia tri" },
-    { label: "SKU", value: skuCount, hint: "Mat hang ban" },
+    { label: "SKU", value: skuCount, hint: "Mat hang" },
     { label: "Cho xu ly", value: openOrders, hint: "Chua giao/huy" }
   ];
 }
 
-function buildColumns(onSelect: (order: OrderDto) => void): DataTableColumn<OrderDto>[] {
-  return [
-    { key: "code", header: "Ma don", render: (row) => row.code },
-    { key: "date", header: "Ngay", render: (row) => row.date },
-    { key: "accountName", header: "Diem ban", render: (row) => row.accountName },
-    { key: "routeName", header: "Tuyen", render: (row) => row.routeName },
-    { key: "owner", header: "Sale", render: (row) => row.owner },
-    { key: "skuCount", header: "SKU", render: (row) => row.skuCount, align: "right" },
-    { key: "quantity", header: "SL", render: (row) => row.quantity, align: "right" },
-    { key: "totalAmount", header: "Gia tri", render: (row) => money.format(row.totalAmount), align: "right" },
-    { key: "status", header: "Trang thai", render: (row) => <span className="badge">{getStatusLabel(row.status)}</span> },
-    { key: "detail", header: "", render: (row) => <button className="button compact" type="button" onClick={() => onSelect(row)}>Xem</button> }
-  ];
+function OrderCard({ order, onSelect }: { order: OrderDto; onSelect: (order: OrderDto) => void }) {
+  return (
+    <article className="order-list-card">
+      <div className="order-list-head">
+        <div>
+          <span>{order.source}</span>
+          <h3>{order.code}</h3>
+        </div>
+        <strong className={getStatusClass(order.status)}>{getStatusLabel(order.status)}</strong>
+      </div>
+
+      <div className="order-list-customer">
+        <b>{order.accountName}</b>
+        <small>{order.routeName} - {order.owner} - {order.date}</small>
+      </div>
+
+      <div className="order-list-metrics">
+        <span>
+          <b>{money.format(order.totalAmount)}</b>
+          <small>Gia tri</small>
+        </span>
+        <span>
+          <b>{order.skuCount}</b>
+          <small>SKU</small>
+        </span>
+        <span>
+          <b>{order.quantity}</b>
+          <small>SL</small>
+        </span>
+      </div>
+
+      <div className="order-list-actions">
+        <button className="button primary" type="button" onClick={() => onSelect(order)}>Xem</button>
+        <button className="button" type="button">Theo doi</button>
+        <button className="button" type="button">Giao</button>
+      </div>
+    </article>
+  );
 }
 
 function OrderDetailSheet({ order, onClose }: { order: OrderDto | null; onClose: () => void }) {
@@ -56,7 +89,7 @@ function OrderDetailSheet({ order, onClose }: { order: OrderDto | null; onClose:
       open={Boolean(order)}
       onClose={onClose}
       title={order ? order.code : "Chi tiet don"}
-      description={order ? `${order.accountName} · ${order.routeName}` : undefined}
+      description={order ? `${order.accountName} - ${order.routeName}` : undefined}
       footer={
         <div className="sheet-action-grid">
           <button className="button primary" type="button">Tao viec theo doi</button>
@@ -69,7 +102,7 @@ function OrderDetailSheet({ order, onClose }: { order: OrderDto | null; onClose:
           <div className="order-total-card">
             <span>Gia tri don</span>
             <strong>{money.format(order.totalAmount)}</strong>
-            <small>{getStatusLabel(order.status)} · {order.source}</small>
+            <small>{getStatusLabel(order.status)} - {order.source}</small>
           </div>
 
           <div className="grid">
@@ -92,16 +125,16 @@ function OrderDetailSheet({ order, onClose }: { order: OrderDto | null; onClose:
 export function OrdersClientPage({ ordersResult }: { ordersResult: ApiResult<OrderDto[]> }) {
   const [selectedOrder, setSelectedOrder] = useState<OrderDto | null>(null);
   const kpis = useMemo(() => buildOrderKpis(ordersResult.data), [ordersResult.data]);
-  const columns = useMemo(() => buildColumns(setSelectedOrder), []);
+  const openOrders = ordersResult.data.filter((order) => order.status !== "delivered" && order.status !== "cancelled").length;
 
   return (
     <AppShell activeHref="/orders">
       <PageHeader
         eyebrow="Orders"
         title="Don hang"
-        subtitle="Theo doi don hang theo diem ban, tuyen, sale phu trach va trang thai xu ly."
+        subtitle="Quet nhanh don theo nguon, diem ban, tuyen, gia tri va trang thai."
       >
-        <span className="badge">Dang theo doi</span>
+        <SourceBadge source={ordersResult.source} />
       </PageHeader>
 
       <FilterBar
@@ -112,25 +145,27 @@ export function OrdersClientPage({ ordersResult }: { ordersResult: ApiResult<Ord
         ]}
       />
 
-      <section className="grid cards">
-        {kpis.map((item) => (
-          <KpiCard key={item.label} label={item.label} value={item.value} hint={item.hint} />
-        ))}
-      </section>
+      <CompactKpiStrip items={kpis} />
 
-      <section className="hero-panel" style={{ marginTop: 18 }}>
-        <div className="card">
-          <h2 className="panel-title">Danh sach don hang</h2>
-          <DataTable columns={columns} rows={ordersResult.data} getRowKey={(row) => row.id} />
+      <section className="orders-section">
+        <div className="dashboard-section-head">
+          <h2>Danh sach don</h2>
+          <span>{openOrders} can xu ly</span>
         </div>
 
-        <div className="card">
-          <h2 className="panel-title">Can xu ly</h2>
-          <div className="grid">
-            <div className="metric-row"><span>Don moi</span><strong>Can chot</strong></div>
-            <div className="metric-row"><span>Giao hang</span><strong>Theo doi</strong></div>
-            <div className="metric-row"><span>Sau ban</span><strong>Cham soc</strong></div>
-          </div>
+        <div className="orders-list">
+          {ordersResult.data.map((order) => (
+            <OrderCard key={order.id} order={order} onSelect={setSelectedOrder} />
+          ))}
+        </div>
+      </section>
+
+      <section className="card orders-next-card">
+        <h2 className="panel-title">Can xu ly</h2>
+        <div className="grid">
+          <div className="metric-row"><span>Don moi</span><strong>Can chot</strong></div>
+          <div className="metric-row"><span>Giao hang</span><strong>Theo doi</strong></div>
+          <div className="metric-row"><span>Sau ban</span><strong>Cham soc</strong></div>
         </div>
       </section>
 
