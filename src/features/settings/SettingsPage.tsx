@@ -8,7 +8,7 @@ export function SettingsPage() {
       <PageHeader
         eyebrow="Settings"
         title="Cai dat app"
-        subtitle="Cac tuy chon phu cho PWA, cap nhat phien ban va cai app. Khong dua vao bottom nav de tranh roi man hinh field sales."
+        subtitle="Quan ly cai dat ung dung, cai app len thiet bi va lam moi phien ban khi can."
       >
         <span className="badge">PWA</span>
       </PageHeader>
@@ -20,13 +20,13 @@ export function SettingsPage() {
           <div>
             <span className="badge">He thong</span>
             <h2 className="panel-title">Thong tin phien ban</h2>
-            <p className="page-subtitle">Hien dang la ban UI/PWA mock-first. Backend, Supabase va VPS se noi sau qua API contract.</p>
+            <p className="page-subtitle">MCP-Plan dang san sang cho quy trinh tuyen ban hang, cham soc diem ban va theo doi cong viec hang ngay.</p>
           </div>
 
           <div className="grid">
-            <div className="metric-row"><span>Mode</span><strong>Mock/API contract</strong></div>
-            <div className="metric-row"><span>Mobile</span><strong>PWA-ready</strong></div>
-            <div className="metric-row"><span>Offline</span><strong>Phase sau</strong></div>
+            <div className="metric-row"><span>Che do</span><strong>San sang su dung</strong></div>
+            <div className="metric-row"><span>Mobile</span><strong>Ho tro PWA</strong></div>
+            <div className="metric-row"><span>Cap nhat</span><strong>Lam moi nhanh</strong></div>
           </div>
         </div>
       </section>
