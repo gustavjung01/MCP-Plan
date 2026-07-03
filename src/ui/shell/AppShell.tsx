@@ -7,8 +7,10 @@ type AppShellProps = {
 };
 
 function NavLinks({ activeHref, mode }: { activeHref: string; mode: "sidebar" | "bottom" }) {
+  const style = mode === "bottom" ? { gridTemplateColumns: `repeat(${NAV_ITEMS.length}, minmax(0, 1fr))` } : undefined;
+
   return (
-    <nav className={mode === "sidebar" ? "sidebar-nav" : "bottom-nav"} aria-label="Main navigation">
+    <nav className={mode === "sidebar" ? "sidebar-nav" : "bottom-nav"} style={style} aria-label="Main navigation">
       {NAV_ITEMS.map((item) => {
         const isActive = item.href === activeHref;
         const className = mode === "sidebar" ? (isActive ? "sidebar-link active" : "sidebar-link") : isActive ? "bottom-nav-link active" : "bottom-nav-link";
