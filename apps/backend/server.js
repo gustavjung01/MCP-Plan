@@ -21,6 +21,22 @@ const routeCustomers = [
   { id: "rc-006", routeId: "route-maintenance", routeName: "Tuyen bao tri du lieu", accountId: "acc-data-001", accountName: "Diem ban thieu thong tin", contactName: "Chua cap nhat", area: "Tong hop", sortOrder: 99, status: "hidden", note: "Tam an khoi tuyen ngay, khong hard delete." }
 ];
 
+const mcpDay = {
+  run: { id: "day-001", routeName: "Tuyen Cho Gao", date: "2026-07-03", owner: "Sale A", status: "opened", openedAt: "08:00" },
+  lines: [
+    { id: "line-001", sortOrder: 1, accountName: "Diem ban Minh Chau", area: "Cho Gao", source: "planned", status: "visited", note: "Tu tuyen goc", result: "Co nhu cau", hasOrder: true },
+    { id: "line-002", sortOrder: 2, accountName: "Diem ban Thanh Phat", area: "Cho Gao", source: "planned", status: "visited", note: "Tu tuyen goc", result: "Co don", hasOrder: true },
+    { id: "line-003", sortOrder: 3, accountName: "Diem ban Huong Que", area: "Cho Gao", source: "planned", status: "pending", note: "Con trong lich", hasOrder: false },
+    { id: "line-004", sortOrder: 4, accountName: "Diem ban Ven Song", area: "Cho Gao", source: "planned", status: "skipped", note: "Bo qua co ly do", result: "Dong cua", hasOrder: false },
+    { id: "line-005", sortOrder: 5, accountName: "Diem ban Tan Loi", area: "Cho Gao", source: "synced", status: "pending", note: "Dong bo them", hasOrder: false },
+    { id: "line-006", sortOrder: 6, accountName: "Diem ban Phat Sinh", area: "Cho Gao", source: "added", status: "pending", note: "Them trong ngay", hasOrder: false }
+  ],
+  results: [
+    { id: "result-001", lineId: "line-001", accountName: "Diem ban Minh Chau", startTime: "08:15", endTime: "08:33", result: "Co nhu cau", hasOrder: true, nextAction: "Theo don" },
+    { id: "result-002", lineId: "line-002", accountName: "Diem ban Thanh Phat", startTime: "09:05", endTime: "09:27", result: "Co don", hasOrder: true, nextAction: "Giao hang" }
+  ]
+};
+
 function json(res, statusCode, payload) {
   const body = JSON.stringify(payload);
 
@@ -133,6 +149,34 @@ function getRouteCustomersData(url) {
   };
 }
 
+function getCurrentMcpDayRun() {
+  return {
+    id: mcpDay.run.id,
+    routeName: mcpDay.run.routeName,
+    date: mcpDay.run.date,
+    owner: mcpDay.run.owner,
+    status: mcpDay.run.status
+  };
+}
+
+function getMcpDayData() {
+  const visited = mcpDay.lines.filter((line) => line.status === "visited").length;
+  const pending = mcpDay.lines.filter((line) => line.status === "pending").length;
+  const added = mcpDay.lines.filter((line) => line.source === "added").length;
+
+  return {
+    run: mcpDay.run,
+    kpis: [
+      { label: "Trong phien", value: mcpDay.lines.length, hint: "Snapshot ngay" },
+      { label: "Da ghe", value: visited, hint: "Co ket qua" },
+      { label: "Cho xu ly", value: pending, hint: "Chua ghe" },
+      { label: "Phat sinh", value: added, hint: "Them trong ngay" }
+    ],
+    lines: mcpDay.lines,
+    results: mcpDay.results
+  };
+}
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || `${HOST}:${PORT}`}`);
 
@@ -178,6 +222,16 @@ const server = http.createServer((req, res) => {
 
   if (url.pathname === "/api/routes/customers/data") {
     json(res, 200, wrap(getRouteCustomersData(url)));
+    return;
+  }
+
+  if (url.pathname === "/api/mcp-day/current") {
+    json(res, 200, wrap(getCurrentMcpDayRun()));
+    return;
+  }
+
+  if (url.pathname === "/api/mcp-day/data") {
+    json(res, 200, wrap(getMcpDayData()));
     return;
   }
 
