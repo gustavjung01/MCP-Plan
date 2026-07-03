@@ -6,21 +6,22 @@ type BottomSheetProps = {
   open?: boolean;
   children: ReactNode;
   footer?: ReactNode;
+  onClose?: () => void;
 };
 
-export function BottomSheet({ title, description, open = false, children, footer }: BottomSheetProps) {
+export function BottomSheet({ title, description, open = false, children, footer, onClose }: BottomSheetProps) {
   if (!open) return null;
 
   return (
-    <div className="sheet-backdrop" role="presentation">
-      <section className="bottom-sheet" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="sheet-backdrop" role="presentation" onClick={onClose}>
+      <section className="bottom-sheet" role="dialog" aria-modal="true" aria-label={title} onClick={(event) => event.stopPropagation()}>
         <div className="sheet-handle" />
         <header className="sheet-header">
           <div>
             <h2>{title}</h2>
             {description ? <p>{description}</p> : null}
           </div>
-          <button className="sheet-close" type="button" aria-label="Dong">
+          <button className="sheet-close" type="button" aria-label="Dong" onClick={onClose}>
             ×
           </button>
         </header>
