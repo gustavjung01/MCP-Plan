@@ -92,9 +92,9 @@ export function ActionsClientPage({ kpis, items }: { kpis: ActionKpi[]; items: A
       <PageHeader
         eyebrow="MCP-Plan"
         title="Ke hoach hanh dong"
-        subtitle="Moi viec co owner, uu tien, han xu ly va popup cap nhat nhanh nhu app mobile."
+        subtitle="Theo doi viec can lam theo owner, uu tien, han xu ly va nguon phat sinh."
       >
-        <span className="badge">Mock data</span>
+        <span className="badge">Dang mo</span>
       </PageHeader>
 
       <FilterBar
@@ -120,9 +120,9 @@ export function ActionsClientPage({ kpis, items }: { kpis: ActionKpi[]; items: A
         <div className="card">
           <h2 className="panel-title">Lien ket workflow</h2>
           <div className="grid">
-            <div className="metric-row"><span>Order</span><strong>Theo doi</strong></div>
-            <div className="metric-row"><span>Check</span><strong>Xu ly</strong></div>
-            <div className="metric-row"><span>Owner</span><strong>Chiu trach nhiem</strong></div>
+            <div className="metric-row"><span>Don hang</span><strong>Theo doi</strong></div>
+            <div className="metric-row"><span>Kiem tra</span><strong>Xu ly</strong></div>
+            <div className="metric-row"><span>Phu trach</span><strong>Ro rang</strong></div>
           </div>
         </div>
       </section>
