@@ -4,6 +4,23 @@ const HOST = process.env.HOST || "127.0.0.1";
 const PORT = Number(process.env.PORT || 3001);
 const SERVICE = "mcp-plan-backend";
 
+const routes = [
+  { id: "route-cho-gao-center", name: "Tuyen Cho Gao trung tam", area: "Cho Gao", salesOwner: "Sale A", plannedCustomers: 18, visitedCustomers: 17, orderCount: 2, lastVisitDate: "2026-06-30", status: "active" },
+  { id: "route-my-tho-east", name: "Tuyen My Tho phia Dong", area: "My Tho", salesOwner: "Sale B", plannedCustomers: 14, visitedCustomers: 11, orderCount: 0, lastVisitDate: "2026-06-30", status: "watch" },
+  { id: "route-go-cong-river", name: "Tuyen Go Cong ven song", area: "Go Cong", salesOwner: "Sale C", plannedCustomers: 12, visitedCustomers: 7, orderCount: 0, lastVisitDate: "2026-06-29", status: "watch" },
+  { id: "route-cai-be-new-agent", name: "Tuyen Cai Be dai ly moi", area: "Cai Be", salesOwner: "Sale A", plannedCustomers: 9, visitedCustomers: 9, orderCount: 1, lastVisitDate: "2026-06-30", status: "active" },
+  { id: "route-maintenance", name: "Tuyen bao tri du lieu", area: "Tong hop", salesOwner: "Admin NPP", plannedCustomers: 0, visitedCustomers: 0, orderCount: 0, lastVisitDate: "-", status: "paused" }
+];
+
+const routeCustomers = [
+  { id: "rc-001", routeId: "route-cho-gao-center", routeName: "Tuyen Cho Gao trung tam", accountId: "acc-cho-gao-001", accountName: "Tap hoa Minh Chau", contactName: "Chi Chau", area: "Cho Gao", sortOrder: 1, status: "active", gps: { lat: 10.35431, lng: 106.46412, accuracyMeters: 18, updatedAt: "2026-06-30" }, note: "Diem ban tier A, uu tien ghe dau tuyen." },
+  { id: "rc-002", routeId: "route-cho-gao-center", routeName: "Tuyen Cho Gao trung tam", accountId: "acc-cho-gao-002", accountName: "Dai ly Thanh Phat", contactName: "Anh Phat", area: "Cho Gao", sortOrder: 2, status: "active", gps: { lat: 10.35911, lng: 106.47042, accuracyMeters: 22, updatedAt: "2026-06-30" }, note: "Co don thuong xuyen." },
+  { id: "rc-003", routeId: "route-my-tho-east", routeName: "Tuyen My Tho phia Dong", accountId: "acc-my-tho-001", accountName: "Cua hang Huong Que", contactName: "Chi Huong", area: "My Tho", sortOrder: 3, status: "needs_gps", note: "Can cap nhat GPS khi ghe lai." },
+  { id: "rc-004", routeId: "route-go-cong-river", routeName: "Tuyen Go Cong ven song", accountId: "acc-go-cong-001", accountName: "Tap hoa Ven Song", contactName: "Anh Nam", area: "Go Cong", sortOrder: 4, status: "active", gps: { lat: 10.36982, lng: 106.59877, accuracyMeters: 35, updatedAt: "2026-06-25" }, note: "Duong ven song, can mo Maps truoc khi di." },
+  { id: "rc-005", routeId: "route-cai-be-new-agent", routeName: "Tuyen Cai Be dai ly moi", accountId: "acc-cai-be-001", accountName: "Dai ly Tan Loi", contactName: "Chi Loi", area: "Cai Be", sortOrder: 5, status: "active", gps: { lat: 10.33542, lng: 106.03252, accuracyMeters: 24, updatedAt: "2026-06-30" }, note: "Khach moi co tiem nang." },
+  { id: "rc-006", routeId: "route-maintenance", routeName: "Tuyen bao tri du lieu", accountId: "acc-data-001", accountName: "Diem ban thieu thong tin", contactName: "Chua cap nhat", area: "Tong hop", sortOrder: 99, status: "hidden", note: "Tam an khoi tuyen ngay, khong hard delete." }
+];
+
 function json(res, statusCode, payload) {
   const body = JSON.stringify(payload);
 
@@ -72,6 +89,50 @@ function getDashboardOverview() {
   };
 }
 
+function getRoutesList() {
+  return routes.map((route) => ({
+    id: route.id,
+    name: route.name,
+    area: route.area,
+    owner: route.salesOwner,
+    active: route.status !== "paused"
+  }));
+}
+
+function getRoutesData() {
+  const totalCustomers = routes.reduce((sum, route) => sum + route.plannedCustomers, 0);
+  const totalVisited = routes.reduce((sum, route) => sum + route.visitedCustomers, 0);
+  const watchRoutes = routes.filter((route) => route.status === "watch").length;
+
+  return {
+    kpis: [
+      { label: "Tuyen active", value: routes.filter((route) => route.status === "active").length, hint: "Backend API" },
+      { label: "Tong diem ban", value: totalCustomers, hint: "Route master" },
+      { label: "Da ghe", value: `${totalVisited}/${totalCustomers}`, hint: "Theo visit hien co" },
+      { label: "Tuyen can theo doi", value: watchRoutes, hint: "Can xem lai lich ghe" }
+    ],
+    routes
+  };
+}
+
+function getRouteCustomersData(url) {
+  const routeId = url.searchParams.get("routeId");
+  const customers = routeId ? routeCustomers.filter((customer) => customer.routeId === routeId) : routeCustomers;
+  const withGps = customers.filter((customer) => Boolean(customer.gps)).length;
+  const needsGps = customers.filter((customer) => customer.status === "needs_gps").length;
+  const hidden = customers.filter((customer) => customer.status === "hidden").length;
+
+  return {
+    kpis: [
+      { label: "Khach trong tuyen", value: customers.length, hint: routeId || "Tat ca tuyen" },
+      { label: "Da co GPS", value: withGps, hint: "Mo duoc ban do" },
+      { label: "Can GPS", value: needsGps, hint: "Can sale cap nhat" },
+      { label: "Dang an", value: hidden, hint: "Khong hard delete" }
+    ],
+    customers
+  };
+}
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || `${HOST}:${PORT}`}`);
 
@@ -102,6 +163,21 @@ const server = http.createServer((req, res) => {
 
   if (url.pathname === "/api/dashboard/overview") {
     json(res, 200, wrap(getDashboardOverview()));
+    return;
+  }
+
+  if (url.pathname === "/api/routes") {
+    json(res, 200, wrap(getRoutesList()));
+    return;
+  }
+
+  if (url.pathname === "/api/routes/data") {
+    json(res, 200, wrap(getRoutesData()));
+    return;
+  }
+
+  if (url.pathname === "/api/routes/customers/data") {
+    json(res, 200, wrap(getRouteCustomersData(url)));
     return;
   }
 
