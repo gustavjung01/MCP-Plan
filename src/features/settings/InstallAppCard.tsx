@@ -15,15 +15,17 @@ function isStandaloneMode() {
 export function InstallAppCard() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
-  const [message, setMessage] = useState("San sang cai nhu app tren dien thoai khi trinh duyet ho tro.");
+  const [isInstalling, setIsInstalling] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [message, setMessage] = useState("San sang cai MCP-Plan nhu mot ung dung rieng tren dien thoai.");
 
   const platformHint = useMemo(() => {
     if (typeof navigator === "undefined") return "";
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.includes("iphone") || userAgent.includes("ipad")) {
-      return "iPhone/iPad: bam Share, chon Add to Home Screen.";
+      return "iPhone/iPad: bam Chia se, chon Them vao man hinh chinh.";
     }
-    return "Android/Chrome: bam Tai app neu nut kha dung, hoac menu trinh duyet -> Add to Home screen.";
+    return "Android/Chrome: bam Tai app, hoac mo menu trinh duyet va chon Them vao man hinh chinh.";
   }, []);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function InstallAppCard() {
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
-      setMessage("Co the cai MCP-Plan nhu app PWA tren thiet bi nay.");
+      setMessage("Thiet bi nay co the cai MCP-Plan nhu app rieng.");
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -40,51 +42,68 @@ export function InstallAppCard() {
   }, []);
 
   async function handleInstall() {
+    if (isInstalling) return;
+
     if (isStandalone) {
-      setMessage("App dang chay o che do standalone.");
+      setMessage("MCP-Plan da dang chay nhu app rieng tren thiet bi nay.");
       return;
     }
 
     if (!installPrompt) {
-      setMessage(platformHint || "Trinh duyet chua mo prompt cai dat. Thu menu Add to Home screen.");
+      setMessage(platformHint || "Trinh duyet hien chua hien nut cai dat tu dong.");
       return;
     }
 
-    await installPrompt.prompt();
-    const choice = await installPrompt.userChoice;
-    setInstallPrompt(null);
-    setMessage(choice.outcome === "accepted" ? "Da gui yeu cau cai app." : "Da huy cai app.");
+    setIsInstalling(true);
+    try {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      setInstallPrompt(null);
+      setMessage(choice.outcome === "accepted" ? "Da gui yeu cau cai app." : "Da huy cai app.");
+    } finally {
+      setIsInstalling(false);
+    }
   }
 
   async function handleRefreshApp() {
-    if ("caches" in window) {
-      const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
-    }
+    if (isUpdating) return;
 
-    if ("serviceWorker" in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.update()));
-    }
+    setIsUpdating(true);
+    setMessage("Dang kiem tra va lam moi phien ban app...");
 
-    window.location.reload();
+    try {
+      if ("caches" in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      }
+
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((registration) => registration.update()));
+      }
+
+      window.setTimeout(() => window.location.reload(), 300);
+    } catch {
+      setMessage("Chua the lam moi tu dong. Hay tai lai trang mot lan nua.");
+      setIsUpdating(false);
+    }
   }
 
   return (
     <div className="card settings-card">
       <div>
-        <span className="badge">PWA</span>
-        <h2 className="panel-title">Tai app va cap nhat</h2>
+        <span className="badge">Ung dung</span>
+        <h2 className="panel-title">Tai app va lam moi phien ban</h2>
         <p className="page-subtitle">{message}</p>
         <p className="settings-hint">{platformHint}</p>
       </div>
 
       <div className="settings-actions">
-        <button className="button primary" onClick={handleInstall} type="button">
-          Tai app
+        <button className="button primary" disabled={isInstalling || isUpdating} onClick={handleInstall} type="button">
+          {isInstalling ? "Dang mo..." : "Tai app"}
         </button>
-        <button className="button" onClick={handleRefreshApp} type="button">
-          Cap nhat ban moi
+        <button className="button" disabled={isUpdating} onClick={handleRefreshApp} type="button">
+          {isUpdating ? "Dang lam moi..." : "Cap nhat ban moi"}
         </button>
       </div>
     </div>
