@@ -1,0 +1,223 @@
+.setupGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.setupCard {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 14px;
+  box-shadow: var(--shadow), var(--ring-soft);
+}
+
+.setupCard span {
+  color: var(--brand-strong);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.setupCard h2 {
+  font-size: 18px;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.setupCard p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.setupMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.setupMetrics strong {
+  border: 1px solid rgba(228, 231, 236, 0.86);
+  border-radius: 14px;
+  background: #fbfffd;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.setupMetrics b {
+  display: block;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.setupMetrics small {
+  color: var(--muted);
+  display: block;
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 12px;
+  box-shadow: var(--shadow), var(--ring-soft);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.head span {
+  color: var(--brand-strong);
+  display: block;
+  font-size: 11px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+
+.head h3 {
+  font-size: 15px;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.status {
+  border-radius: 999px;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 5px 8px;
+}
+
+.normal {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.opportunity {
+  background: #e7f9eb;
+  color: #167c32;
+}
+
+.risk {
+  background: #fff0ed;
+  color: #c63b2e;
+}
+
+.context {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.context b {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context small {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 7px;
+}
+
+.metrics span {
+  border: 1px solid rgba(228, 231, 236, 0.86);
+  border-radius: 14px;
+  background: #fbfffd;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.metrics b {
+  display: block;
+  font-size: 13px;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metrics small {
+  color: var(--muted);
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.actions button {
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 900;
+  min-height: 32px;
+  padding: 0 8px;
+}
+
+.nextCard {
+  margin-top: 16px;
+}
+
+@media (max-width: 820px) {
+  .setupGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .setupCard,
+  .card {
+    border-color: rgba(228, 231, 236, 0.78);
+    background: rgba(255, 255, 255, 0.92);
+    padding: 10px;
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  .setupMetrics,
+  .metrics {
+    gap: 6px;
+  }
+
+  .actions button {
+    min-height: 30px;
+    padding: 0 5px;
+  }
+}
