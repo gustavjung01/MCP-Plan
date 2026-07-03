@@ -7,10 +7,8 @@ import { PageHeader } from "@/ui/layout/PageHeader";
 import { BottomSheet } from "@/ui/overlay/BottomSheet";
 import { AppShell } from "@/ui/shell/AppShell";
 import { DataTable, type DataTableColumn } from "@/ui/table/DataTable";
-import { mcpDayMock } from "@/features/mcp-day/mcp-day.mock";
-import type { DayLineSource, DayLineStatus, McpDayLine, McpDayResult } from "@/features/mcp-day/mcp-day.types";
-import { routesMock } from "@/features/routes/routes.mock";
-import type { RouteItem, RouteStatus } from "@/features/routes/routes.types";
+import type { DayLineSource, DayLineStatus, McpDayData, McpDayLine, McpDayResult } from "@/features/mcp-day/mcp-day.types";
+import type { RoutesData, RouteItem, RouteStatus } from "@/features/routes/routes.types";
 import { MCP_SESSION_SNAPSHOT_RULES } from "./mcp-session-contract";
 
 function routeStatusLabel(status: RouteStatus) {
@@ -124,11 +122,11 @@ function CustomerSheet({ line, onClose }: { line: McpDayLine | null; onClose: ()
   );
 }
 
-export function MCPPage({ activeHref = "/visits" }: { activeHref?: string }) {
+export function MCPPage({ activeHref = "/visits", routesData, mcpDayData }: { activeHref?: string; routesData: RoutesData; mcpDayData: McpDayData }) {
   const [selectedRoute, setSelectedRoute] = useState<RouteItem | null>(null);
   const [selectedLine, setSelectedLine] = useState<McpDayLine | null>(null);
   const [sessionStatus, setSessionStatus] = useState("opened");
-  const run = mcpDayMock.run;
+  const run = mcpDayData.run;
 
   const routeColumns = useMemo<DataTableColumn<RouteItem>[]>(() => [
     { key: "name", header: "Tuyen", render: (row) => row.name },
@@ -170,13 +168,13 @@ export function MCPPage({ activeHref = "/visits" }: { activeHref?: string }) {
       />
 
       <section className="grid cards">
-        {mcpDayMock.kpis.map((item) => <KpiCard key={item.label} label={item.label} value={item.value} hint={item.hint} />)}
+        {mcpDayData.kpis.map((item) => <KpiCard key={item.label} label={item.label} value={item.value} hint={item.hint} />)}
       </section>
 
       <section className="hero-panel" style={{ marginTop: 18 }}>
         <div className="card">
           <h2 className="panel-title">1. Chon tuyen de mo phien</h2>
-          <DataTable columns={routeColumns} rows={routesMock.routes} getRowKey={(row) => row.id} emptyMessage="Chua co tuyen" />
+          <DataTable columns={routeColumns} rows={routesData.routes} getRowKey={(row) => row.id} emptyMessage="Chua co tuyen" />
         </div>
         <div className="card">
           <h2 className="panel-title">Flow MCP chuan</h2>
@@ -191,12 +189,12 @@ export function MCPPage({ activeHref = "/visits" }: { activeHref?: string }) {
 
       <section className="card">
         <h2 className="panel-title">2. Khach trong phien MCP ngay</h2>
-        <DataTable columns={customerColumns} rows={mcpDayMock.lines} getRowKey={(row) => row.id} />
+        <DataTable columns={customerColumns} rows={mcpDayData.lines} getRowKey={(row) => row.id} />
       </section>
 
       <section className="card">
         <h2 className="panel-title">3. Ket qua da ghe</h2>
-        <DataTable columns={resultColumns} rows={mcpDayMock.results} getRowKey={(row) => row.id} />
+        <DataTable columns={resultColumns} rows={mcpDayData.results} getRowKey={(row) => row.id} />
       </section>
 
       <section className="card">
