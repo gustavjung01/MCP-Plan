@@ -44,29 +44,52 @@ body {
   opacity: 0.55;
 }
 
-.card:hover,
-.action-card:hover,
-.mobile-row-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-deep), var(--ring-soft);
-}
-
 .card,
 .action-card,
 .mobile-row-card,
 .button,
 .sidebar-link,
 .bottom-nav a {
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease, opacity 160ms ease;
+}
+
+@media (hover: hover) {
+  .card:hover,
+  .action-card:hover,
+  .mobile-row-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-deep), var(--ring-soft);
+  }
+
+  .button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.78) inset, 0 14px 30px rgba(16, 24, 40, 0.12);
+  }
 }
 
 .button {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.72) inset, 0 8px 22px rgba(16, 24, 40, 0.06);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
-.button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.78) inset, 0 14px 30px rgba(16, 24, 40, 0.12);
+.button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 4px 14px rgba(16, 24, 40, 0.1);
+}
+
+.button:focus-visible,
+.sidebar-link:focus-visible,
+.bottom-nav a:focus-visible,
+.sheet-close:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.28);
+  outline-offset: 3px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
 }
 
 .button.primary {
