@@ -1,6 +1,6 @@
 # Backend API Phase 7
 
-Goal: align frontend screens with real backend read endpoints, one module at a time.
+Goal: align frontend screens with backend read endpoints, then replace in-memory mock data with Supabase read queries while keeping the same API contracts.
 
 ## Current completed endpoints
 
@@ -31,6 +31,52 @@ These endpoints return wrapped payloads:
 
 The frontend API client recognizes this shape and marks the result as `source: api`.
 
+## Current backend data mode
+
+```text
+Supabase live read mode.
+```
+
+The backend now reads from Supabase using server-side service-role credentials and maps the rows back to the existing frontend DTO contracts.
+
+Required VPS env:
+
+```env
+SUPABASE_URL=https://noiadkpkvdohljgopgfb.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<server-only-service-role-key>
+```
+
+Do not put `SUPABASE_SERVICE_ROLE_KEY` in Vercel/frontend env.
+
+If backend env is missing, data endpoints return:
+
+```json
+{
+  "ok": false,
+  "service": "mcp-plan-backend",
+  "error": "missing_supabase_config"
+}
+```
+
+This is intentional. Do not silently fake live data.
+
+## Tables currently read
+
+```text
+mcp_routes
+mcp_route_customers
+mcp_route_sessions
+mcp_visits
+orders
+order_items
+test_customer_results
+test_customers
+```
+
+`market_reports` currently has no rows, so market/test screens are driven from product test result data for now.
+
+`actions` is currently derived from live read data: pending MCP lines, open orders, and test results needing attention. A dedicated task table/write flow should be added later.
+
 ## VPS deploy
 
 From local, sync upstream to origin first, then deploy backend on VPS using the existing backend deploy script.
@@ -41,6 +87,21 @@ On VPS:
 /var/www/deploy-mcp-backend.sh
 ```
 
+## Env check on VPS
+
+```bash
+cd /var/www/mcp-plan-backend
+node -e "require('dotenv').config?.(); console.log(Boolean(process.env.SUPABASE_URL), Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY))"
+```
+
+If dotenv is not installed or the command is inconvenient, inspect the runtime env safely:
+
+```bash
+pm2 env mcp-plan-backend | grep SUPABASE
+```
+
+Do not print the service-role key value in logs or chat.
+
 ## Quick checks on VPS
 
 ```bash
@@ -50,34 +111,20 @@ curl -fsS http://127.0.0.1:3001/api/dashboard/overview
 curl -fsS http://127.0.0.1:3001/api/routes
 curl -fsS http://127.0.0.1:3001/api/routes/data
 curl -fsS http://127.0.0.1:3001/api/routes/customers/data
-curl -fsS 'http://127.0.0.1:3001/api/routes/customers/data?routeId=route-cho-gao-center'
 curl -fsS http://127.0.0.1:3001/api/mcp-day/current
 curl -fsS http://127.0.0.1:3001/api/mcp-day/data
 curl -fsS http://127.0.0.1:3001/api/orders
-curl -fsS 'http://127.0.0.1:3001/api/orders?status=confirmed'
-curl -fsS 'http://127.0.0.1:3001/api/orders?search=Minh'
 curl -fsS http://127.0.0.1:3001/api/tests
-curl -fsS http://127.0.0.1:3001/api/market-checks
 curl -fsS http://127.0.0.1:3001/api/market-checks/data
-curl -fsS 'http://127.0.0.1:3001/api/market-checks?status=risk'
-curl -fsS 'http://127.0.0.1:3001/api/market-checks/data?search=Sua'
-curl -fsS http://127.0.0.1:3001/api/actions
 curl -fsS http://127.0.0.1:3001/api/actions/data
-curl -fsS 'http://127.0.0.1:3001/api/actions?priority=high'
-curl -fsS 'http://127.0.0.1:3001/api/actions/data?status=doing'
 
 curl -fsS http://165.22.109.61/api/dashboard/summary
 curl -fsS http://165.22.109.61/api/dashboard/overview
-curl -fsS http://165.22.109.61/api/routes
 curl -fsS http://165.22.109.61/api/routes/data
 curl -fsS http://165.22.109.61/api/routes/customers/data
-curl -fsS http://165.22.109.61/api/mcp-day/current
 curl -fsS http://165.22.109.61/api/mcp-day/data
 curl -fsS http://165.22.109.61/api/orders
 curl -fsS http://165.22.109.61/api/tests
-curl -fsS http://165.22.109.61/api/market-checks
-curl -fsS http://165.22.109.61/api/market-checks/data
-curl -fsS http://165.22.109.61/api/actions
 curl -fsS http://165.22.109.61/api/actions/data
 ```
 
@@ -95,6 +142,8 @@ Expected dashboard summary shape:
   "receivedAt": "..."
 }
 ```
+
+Values are live and may change as Supabase rows change.
 
 Expected dashboard overview shape:
 
@@ -159,6 +208,14 @@ data.results
 receivedAt
 ```
 
+Important MCP note:
+
+```text
+There is still no mcp_session_customers snapshot table.
+Current read mapping builds MCP day lines from route customers plus visits for the latest session.
+The proper snapshot table is still required before backend write flow.
+```
+
 Expected orders shape:
 
 ```text
@@ -192,19 +249,6 @@ data.checks[].shelfPrice
 data.checks[].stockStatus
 data.checks[].note
 data.checks[].status
-receivedAt
-```
-
-Expected market checks list shape:
-
-```text
-data[]
-data[].id
-data[].date
-data[].routeName
-data[].accountName
-data[].productName
-data[].status
 receivedAt
 ```
 
@@ -245,21 +289,17 @@ Supported query params:
 status
 priority
 search
-```
-
-## Read API status
-
-```text
-Phase 7 read endpoints are complete for current frontend modules.
+routeId
 ```
 
 ## Next backend work
 
 ```text
-1. Replace in-memory mock data with Supabase read queries behind the same API contracts.
-2. Add backend write APIs module by module.
-3. Move browser writes to backend-owned endpoints.
-4. Tighten Supabase RLS only after backend write flow is verified.
+1. Deploy and verify Supabase live read endpoints on VPS.
+2. Add mcp_session_customers snapshot table/migration after orphan/schema audit.
+3. Add backend write APIs module by module.
+4. Move browser writes to backend-owned endpoints.
+5. Tighten Supabase RLS only after backend write flow is verified.
 ```
 
 ## Important rule
