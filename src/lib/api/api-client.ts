@@ -48,6 +48,67 @@ function result<T>(data: T, source: ApiResult<T>["source"] = "mock"): ApiResult<
   };
 }
 
+function toQueryString(query?: ListQuery): string {
+  if (!query) {
+    return "";
+  }
+
+  const params = new URLSearchParams();
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      params.set(key, String(value));
+    }
+  });
+
+  const value = params.toString();
+  return value ? `?${value}` : "";
+}
+
+function getApiBaseUrl(): string | null {
+  const value = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+
+  if (!value) {
+    return null;
+  }
+
+  return value.replace(/\/+$/, "");
+}
+
+async function fetchJson<T>(baseUrl: string, path: string, query?: ListQuery): Promise<ApiResult<T>> {
+  const response = await fetch(`${baseUrl}${path}${toQueryString(query)}`, {
+    cache: "no-store",
+    headers: {
+      Accept: "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`API ${path} failed with ${response.status}`);
+  }
+
+  const payload = (await response.json()) as T | { data: T; receivedAt?: string };
+
+  if (payload && typeof payload === "object" && "data" in payload) {
+    const wrapped = payload as { data: T; receivedAt?: string };
+    return {
+      data: wrapped.data,
+      source: "api",
+      receivedAt: wrapped.receivedAt ?? new Date().toISOString()
+    };
+  }
+
+  return result(payload as T, "api");
+}
+
+async function withMockFallback<T>(apiRequest: () => Promise<ApiResult<T>>, mockRequest: () => Promise<ApiResult<T>>): Promise<ApiResult<T>> {
+  try {
+    return await apiRequest();
+  } catch {
+    return mockRequest();
+  }
+}
+
 export const mockApiClient: McpApiClient = {
   async getDashboardSummary() {
     return result({ routeCount: 8, accountCount: 51, visitCount: 73, orderAmount: 403000, actionCount: 9 });
@@ -129,6 +190,59 @@ export const mockApiClient: McpApiClient = {
   }
 };
 
+function createHttpApiClient(baseUrl: string): McpApiClient {
+  return {
+    getDashboardSummary() {
+      return withMockFallback(() => fetchJson<DashboardSummaryDto>(baseUrl, "/api/dashboard/summary"), () => mockApiClient.getDashboardSummary());
+    },
+    getDashboardOverview() {
+      return withMockFallback(() => fetchJson<DashboardOverviewDto>(baseUrl, "/api/dashboard/overview"), () => mockApiClient.getDashboardOverview());
+    },
+    listRoutes(query) {
+      return withMockFallback(() => fetchJson<RouteDto[]>(baseUrl, "/api/routes", query), () => mockApiClient.listRoutes(query));
+    },
+    getRoutesData(query) {
+      return withMockFallback(() => fetchJson<RoutesData>(baseUrl, "/api/routes/data", query), () => mockApiClient.getRoutesData(query));
+    },
+    getRouteCustomersData(query) {
+      return withMockFallback(() => fetchJson<RouteCustomersData>(baseUrl, "/api/routes/customers/data", query), () => mockApiClient.getRouteCustomersData(query));
+    },
+    listAccounts(query) {
+      return withMockFallback(() => fetchJson<AccountDto[]>(baseUrl, "/api/accounts", query), () => mockApiClient.listAccounts(query));
+    },
+    getAccountsData(query) {
+      return withMockFallback(() => fetchJson<AccountsData>(baseUrl, "/api/accounts/data", query), () => mockApiClient.getAccountsData(query));
+    },
+    getCurrentDayRun(query) {
+      return withMockFallback(() => fetchJson<DayRunDto>(baseUrl, "/api/mcp-day/current", query), () => mockApiClient.getCurrentDayRun(query));
+    },
+    getMcpDayData(query) {
+      return withMockFallback(() => fetchJson<McpDayData>(baseUrl, "/api/mcp-day/data", query), () => mockApiClient.getMcpDayData(query));
+    },
+    listMarketChecks(query) {
+      return withMockFallback(() => fetchJson<MarketCheckDto[]>(baseUrl, "/api/market-checks", query), () => mockApiClient.listMarketChecks(query));
+    },
+    getMarketChecksData(query) {
+      return withMockFallback(() => fetchJson<MarketChecksData>(baseUrl, "/api/market-checks/data", query), () => mockApiClient.getMarketChecksData(query));
+    },
+    listOrders(query) {
+      return withMockFallback(() => fetchJson<OrderDto[]>(baseUrl, "/api/orders", query), () => mockApiClient.listOrders(query));
+    },
+    listActions(query) {
+      return withMockFallback(() => fetchJson<ActionDto[]>(baseUrl, "/api/actions", query), () => mockApiClient.listActions(query));
+    },
+    getActionsData(query) {
+      return withMockFallback(() => fetchJson<ActionsData>(baseUrl, "/api/actions/data", query), () => mockApiClient.getActionsData(query));
+    }
+  };
+}
+
 export function createApiClient(): McpApiClient {
-  return mockApiClient;
+  const apiBaseUrl = getApiBaseUrl();
+
+  if (!apiBaseUrl) {
+    return mockApiClient;
+  }
+
+  return createHttpApiClient(apiBaseUrl);
 }
