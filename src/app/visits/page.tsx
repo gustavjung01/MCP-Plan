@@ -1,5 +1,5 @@
-import { McpDayPage } from "@/features/mcp-day/McpDayPage";
+import { MCPPage } from "@/features/mcp/MCPPage";
 
 export default function Page() {
-  return <McpDayPage />;
+  return <MCPPage activeHref="/visits" />;
 }
