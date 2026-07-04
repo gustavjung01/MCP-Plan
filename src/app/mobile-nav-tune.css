@@ -8,10 +8,7 @@
   }
 
   html,
-  body {
-    background: #101828;
-  }
-
+  body,
   .app-shell {
     background: #f7f8fb;
   }
@@ -21,15 +18,7 @@
   }
 
   .app-shell::after {
-    content: "";
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 49;
-    height: var(--mobile-bottom-safe);
-    background: #101828;
-    pointer-events: none;
+    content: none;
   }
 
   .bottom-nav {
@@ -65,12 +54,14 @@
     z-index: 90;
     align-items: end;
     min-height: 100dvh;
-    padding-top: var(--mobile-sheet-top-safe);
+    padding: var(--mobile-sheet-top-safe) 0 0;
+    background: rgba(16, 24, 40, 0.34);
   }
 
   .bottom-sheet {
     width: 100%;
     max-height: calc(100dvh - var(--mobile-sheet-top-safe));
+    margin: 0;
     padding-bottom: calc(14px + env(safe-area-inset-bottom));
   }
 
