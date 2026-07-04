@@ -1,7 +1,7 @@
 @media (max-width: 820px) {
   html,
   body {
-    background: #101828;
+    background: #f7f8fb;
   }
 
   .app-shell {
@@ -9,24 +9,16 @@
   }
 
   .main {
-    padding-bottom: 86px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
   }
 
   .app-shell::after {
-    content: "";
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 49;
-    height: 26px;
-    background: #101828;
-    pointer-events: none;
+    content: none;
   }
 
   .bottom-nav {
     right: 8px;
-    bottom: 12px;
+    bottom: max(8px, env(safe-area-inset-bottom));
     left: 8px;
     z-index: 50;
     border: 1px solid rgba(255, 255, 255, 0.52);
@@ -56,16 +48,12 @@
 
 @media (max-width: 420px) {
   .main {
-    padding-bottom: 84px;
-  }
-
-  .app-shell::after {
-    height: 24px;
+    padding-bottom: calc(74px + env(safe-area-inset-bottom));
   }
 
   .bottom-nav {
     right: 6px;
-    bottom: 10px;
+    bottom: max(6px, env(safe-area-inset-bottom));
     left: 6px;
     border-radius: 20px;
     padding: 5px;
