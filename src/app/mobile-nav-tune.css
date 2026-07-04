@@ -1,10 +1,11 @@
 @media (max-width: 820px) {
   :root {
     --mobile-bottom-nav-height: 56px;
-    --mobile-bottom-nav-gap: 10px;
-    --mobile-bottom-safe: max(8px, env(safe-area-inset-bottom));
+    --mobile-bottom-nav-gap: 4px;
+    --mobile-bottom-safe: max(4px, calc(env(safe-area-inset-bottom) - 22px));
     --mobile-bottom-nav-reserve: calc(var(--mobile-bottom-nav-height) + var(--mobile-bottom-nav-gap) + var(--mobile-bottom-safe));
     --mobile-sheet-top-safe: max(12px, env(safe-area-inset-top));
+    --mobile-sheet-bottom-safe: max(14px, env(safe-area-inset-bottom));
   }
 
   html,
@@ -62,7 +63,7 @@
     width: 100%;
     max-height: calc(100dvh - var(--mobile-sheet-top-safe));
     margin: 0;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    padding-bottom: var(--mobile-sheet-bottom-safe);
   }
 
   .sheet-body {
