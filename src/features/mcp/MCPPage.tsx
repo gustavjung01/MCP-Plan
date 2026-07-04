@@ -243,8 +243,6 @@ function RouteCard({ route, onSelect }: { route: RouteItem; onSelect: (route: Ro
 }
 
 function RouteCustomerCard({ customer, onSelect }: { customer: RouteCustomerItem; onSelect: (customer: RouteCustomerItem) => void }) {
-  const mapsUrl = buildGoogleMapsUrl(customer);
-
   return (
     <OperationalListCard
       leading={<span>#{customer.sortOrder}</span>}
@@ -253,10 +251,7 @@ function RouteCustomerCard({ customer, onSelect }: { customer: RouteCustomerItem
       description={customer.routeName}
       badge={<span className={routeCustomerStatusClass(customer.status)}>{routeCustomerStatusLabel(customer.status)}</span>}
       meta={[gpsLabel(customer), customer.note]}
-      actions={[
-        { label: "Sửa", tone: "primary", onClick: () => onSelect(customer) },
-        ...(mapsUrl ? [{ label: "Maps" }] : [])
-      ]}
+      actions={[{ label: "Sửa", tone: "primary", onClick: () => onSelect(customer) }]}
     />
   );
 }
